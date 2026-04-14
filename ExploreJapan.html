@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Explore Japan · Sakura Dining</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        :root {
+            --ink: #080604;
+            --paper: #F0E8D5;
+            --yama: #B8973A;
+            --yama2: #D4AE52;
+            --beni: #7A2E1E;
+            --ff-en: 'Cormorant Garamond', serif;
+            --ff-ui: 'DM Sans', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--ink);
+            color: var(--paper);
+            font-family: var(--ff-ui);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Luxury Header */
+        .nav-header {
+            padding: 40px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(184, 151, 58, 0.2);
+        }
+
+        .nav-header h1 {
+            font-family: var(--ff-en);
+            font-size: 32px;
+            margin: 0;
+            color: var(--yama2);
+            letter-spacing: 0.1em;
+        }
+
+        .nav-header p {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            opacity: 0.5;
+            margin-top: 5px;
+        }
+
+        /* Horizontal Scroll Container */
+        .explorer-grid {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            padding: 20px;
+            gap: 20px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .explorer-grid::-webkit-scrollbar { display: none; }
+
+        /* Landmark Card */
+        .landmark-card {
+            flex: 0 0 85vw;
+            height: 60vh;
+            background: linear-gradient(180deg, rgba(20,18,15,1) 0%, rgba(8,6,4,1) 100%);
+            border: 1px solid rgba(184, 151, 58, 0.2);
+            border-radius: 12px;
+            position: relative;
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        model-viewer {
+            width: 100%;
+            flex: 1;
+            background-color: transparent;
+        }
+
+        .landmark-info {
+            padding: 20px;
+            background: rgba(18, 16, 14, 0.9);
+            border-top: 1px solid rgba(184, 151, 58, 0.1);
+        }
+
+        .landmark-name {
+            font-family: var(--ff-en);
+            font-size: 24px;
+            color: var(--paper);
+            margin-bottom: 4px;
+        }
+
+        .landmark-city {
+            font-size: 10px;
+            color: var(--yama);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+        }
+
+        .ar-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--yama) 0%, var(--yama2) 100%);
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .ar-btn:active { transform: scale(0.98); }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(240, 232, 213, 0.1);
+            border: 1px solid rgba(240, 232, 213, 0.2);
+            color: var(--paper);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 10px;
+            text-decoration: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="FunZone.html" class="back-btn">← Back</a>
+
+    <div class="nav-header">
+        <h1>Explore Japan</h1>
+        <p>Augmented Reality Landmarks</p>
+    </div>
+
+    <div class="explorer-grid" id="grid">
+        </div>
+
+    <script>
+        // List of models from your screenshot
+        const landmarks = [
+            { name: "Tokyo Skytree", city: "Tokyo", file: "tokyo skytree 3d model.glb" },
+            { name: "Osaka Castle", city: "Osaka", file: "Osaka Castle 3d model.glb" },
+            { name: "Kiyomizu-dera", city: "Kyoto", file: "Kiyomizu-dera Temple.glb" },
+            { name: "Todai-ji Temple", city: "Nara", file: "Todai-ji Temple.glb" },
+            { name: "Himeji Castle", city: "Hyogo", file: "himeji castle 3d model.glb" },
+            { name: "Tokyo Tower", city: "Tokyo", file: "tokyo tower 3d model.glb" },
+            { name: "Meiji Jingu", city: "Tokyo", file: "Meiji Jingu Shrine.glb" },
+            { name: "Nijo Castle", city: "Kyoto", file: "Nijo Castle japan.glb" },
+            { name: "Asakusa Temple", city: "Tokyo", file: "Asakusa japan .glb" }
+        ];
+
+        const grid = document.getElementById('grid');
+
+        landmarks.forEach(l => {
+            const card = document.createElement('div');
+            card.className = 'landmark-card';
+            // Path points to your ExploreJapan folder in GitHub
+            const modelPath = `ExploreJapan/${l.file}`;
+            
+            card.innerHTML = `
+<model-viewer 
+  src="${modelPath}"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-placement="floor"
+  ar-scale="fixed"
+
+  camera-controls
+  touch-action="pan-y"
+
+  camera-orbit="0deg 75deg .6m"
+  min-camera-orbit="0deg 75deg .6m"
+  max-camera-orbit="0deg 75deg .6m"
+
+  interaction-prompt="none"
+  shadow-intensity="1"
+  environment-image="neutral"
+  style="width:100%;height:100%;">
+</model-viewer>
+
+<!-- 📸 + 🎥 CONTROLS -->
+<div style="position:absolute;bottom:80px;right:20px;display:flex;gap:10px;z-index:10;">
+  <button class="snap-btn" style="padding:8px 12px;border:none;border-radius:6px;background:#000;color:#fff;">📸</button>
+  <button class="record-btn" style="padding:8px 12px;border:none;border-radius:6px;background:red;color:#fff;">🎥</button>
+</div>
+
+<div class="landmark-info">
+  <div class="landmark-name">${l.name}</div>
+  <div class="landmark-city">${l.city}</div>
+  <button class="ar-btn">🪐 View in Real World</button>
+</div>
+`;
+
+            grid.appendChild(card);
+        });
+        
+    </script>
+</body>
+</html>

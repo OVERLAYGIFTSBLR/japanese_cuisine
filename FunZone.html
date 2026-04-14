@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FunZone · Sakura Dining</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #080604;
+            --paper: #F0E8D5;
+            --yama: #B8973A;
+            --yama2: #D4AE52;
+            --ff-en: 'Cormorant Garamond', serif;
+            --ff-ui: 'DM Sans', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--ink);
+            color: var(--paper);
+            font-family: var(--ff-ui);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Subtle Grain Overlay to match your main menu */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: var(--ff-en);
+            font-size: 42px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            margin: 0;
+            color: var(--yama2);
+        }
+
+        .header p {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: rgba(240, 232, 213, 0.4);
+            margin-top: 8px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .fz-btn {
+            background: rgba(240, 232, 213, 0.05);
+            border: 1px solid rgba(184, 151, 58, 0.3);
+            color: var(--paper);
+            padding: 18px;
+            font-family: var(--ff-ui);
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .fz-btn:hover, .fz-btn:active {
+            background: var(--yama);
+            color: var(--ink);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .fz-btn.locked {
+            opacity: 0.5;
+            border-style: dashed;
+            cursor: default;
+        }
+
+        .fz-btn.locked:active {
+            transform: none;
+        }
+
+        .back-link {
+            margin-top: 50px;
+            font-size: 11px;
+            color: var(--yama2);
+            text-decoration: none;
+            border-bottom: 1px solid var(--yama);
+            padding-bottom: 2px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>FunZone</h1>
+        <p>Interactive Experience</p>
+    </div>
+
+    <div class="button-container">
+        <a href="ExploreJapan.html" class="fz-btn">
+            Explore Japan
+        </a>
+
+        <div class="fz-btn locked">
+            Game 02 (Coming Soon)
+        </div>
+
+        <div class="fz-btn locked">
+            Game 03 (Coming Soon)
+        </div>
+    </div>
+
+   
+
+</body>
+</html>

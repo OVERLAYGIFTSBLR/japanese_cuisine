@@ -1,1 +1,1 @@
-# japanese_cuisine
+# japanesecuisine
