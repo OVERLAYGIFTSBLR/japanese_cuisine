@@ -25,13 +25,12 @@
     display: none;
   }
 
-  /* FIX: z-index raised to 200 — always above ui-layer (z-index:10) */
   #camera-placeholder {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
-    z-index: 200;
+    z-index: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -280,6 +279,7 @@
     letter-spacing: 0.05em;
   }
 
+  /* AR Popup Overlay */
   #ar-overlay {
     position: fixed;
     inset: 0;
@@ -336,9 +336,10 @@
 </head>
 <body>
 
+<!-- Live Camera Feed -->
 <video id="camera-feed" autoplay muted playsinline></video>
 
-<!-- z-index 200 — always on top until camera is granted -->
+<!-- Camera Permission Screen -->
 <div id="camera-placeholder">
   <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -348,7 +349,10 @@
   <button id="enable-camera-btn" onclick="startCamera()">Enable Camera</button>
 </div>
 
+<!-- UI Layer (floats over camera) -->
 <div id="ui-layer">
+
+  <!-- Header -->
   <div class="header">
     <div class="header-top">
       <span class="logo">Sakura Dining</span>
@@ -357,8 +361,10 @@
     <div class="filter-tabs" id="tabs"></div>
   </div>
 
+  <!-- Scrollable Menu -->
   <div class="menu-scroll" id="menu-scroll"></div>
 
+  <!-- Bottom Bar -->
   <div class="bottom-bar">
     <div class="live-dot">
       <div class="dot"></div>
@@ -366,8 +372,10 @@
     </div>
     <button class="cart-btn" id="cart-btn">View Cart · ₹0</button>
   </div>
+
 </div>
 
+<!-- AR Item Popup -->
 <div id="ar-overlay">
   <div class="ar-popup">
     <div class="ar-popup-emoji" id="popup-emoji">🍜</div>
@@ -378,25 +386,30 @@
 </div>
 
 <script>
+  // ─── MENU DATA ───────────────────────────────────────────────
+  // To use your own .glb models, replace emoji with model paths
+  // and integrate model-viewer in the AR popup section below
   const menu = [
-    { cat: "Starters", name: "Gyoza",            desc: "Pan-fried dumplings filled with juicy meat and vegetables, crispy outside and tender inside.", price: 820,  emoji: "🥟", veg: false },
-    { cat: "Starters", name: "Edamame",          desc: "Steamed young soybeans lightly salted, a classic Japanese starter.",                           price: 250,  emoji: "🫛", veg: true  },
-    { cat: "Starters", name: "Karaage",          desc: "Light and crispy battered fried chicken, deep-fried to perfection.",                           price: 480,  emoji: "🍗", veg: false },
-    { cat: "Starters", name: "Miso Soup",        desc: "Traditional Japanese soup with tofu, wakame and spring onions.",                               price: 180,  emoji: "🍲", veg: true  },
-    { cat: "Ramen",    name: "Tonkotsu",         desc: "Rich pork bone broth with chashu, soft egg, noodles and bamboo shoots.",                       price: 620,  emoji: "🍜", veg: false },
-    { cat: "Ramen",    name: "Miso Ramen",       desc: "Rich miso-based broth with noodles, corn, butter and tender meat.",                            price: 580,  emoji: "🍜", veg: false },
-    { cat: "Ramen",    name: "Shoyu Ramen",      desc: "Light soy-based broth with chicken, mushrooms and spring onions.",                             price: 540,  emoji: "🍜", veg: false },
-    { cat: "Sushi",    name: "Salmon Nigiri",    desc: "Fresh Atlantic salmon over hand-pressed seasoned sushi rice.",                                 price: 390,  emoji: "🍣", veg: false },
-    { cat: "Sushi",    name: "Tuna Roll",        desc: "Classic maki roll with bluefin tuna, avocado and sesame.",                                     price: 420,  emoji: "🌀", veg: false },
-    { cat: "Sushi",    name: "Veggie Roll",      desc: "Cucumber, avocado and pickled radish wrapped in nori and rice.",                               price: 320,  emoji: "🥑", veg: true  },
-    { cat: "Mains",    name: "Teriyaki Salmon",  desc: "Grilled salmon glazed with sweet teriyaki sauce, served with steamed rice.",                   price: 780,  emoji: "🐟", veg: false },
-    { cat: "Mains",    name: "Katsu Curry",      desc: "Crispy panko-breaded cutlet over Japanese curry with steamed rice.",                           price: 650,  emoji: "🍛", veg: false },
-    { cat: "Desserts", name: "Matcha Ice Cream", desc: "Rich and creamy ceremonial grade matcha ice cream, three scoops.",                             price: 280,  emoji: "🍦", veg: true  },
-    { cat: "Desserts", name: "Mochi",            desc: "Soft glutinous rice cakes filled with sweet red bean paste.",                                  price: 220,  emoji: "🍡", veg: true  },
+    { cat: "Starters", name: "Gyoza",       desc: "Pan-fried dumplings filled with juicy meat and vegetables, crispy outside and tender inside.", price: 820,  emoji: "🥟", veg: false },
+    { cat: "Starters", name: "Edamame",     desc: "Steamed young soybeans lightly salted, a classic Japanese starter.",                           price: 250,  emoji: "🫛", veg: true  },
+    { cat: "Starters", name: "Karaage",     desc: "Light and crispy battered fried chicken, deep-fried to perfection.",                           price: 480,  emoji: "🍗", veg: false },
+    { cat: "Starters", name: "Miso Soup",   desc: "Traditional Japanese soup with tofu, wakame and spring onions.",                               price: 180,  emoji: "🍲", veg: true  },
+    { cat: "Ramen",    name: "Tonkotsu",    desc: "Rich pork bone broth with chashu, soft egg, noodles and bamboo shoots.",                       price: 620,  emoji: "🍜", veg: false },
+    { cat: "Ramen",    name: "Miso Ramen",  desc: "Rich miso-based broth with noodles, corn, butter and tender meat.",                            price: 580,  emoji: "🍜", veg: false },
+    { cat: "Ramen",    name: "Shoyu Ramen", desc: "Light soy-based broth with chicken, mushrooms and spring onions.",                             price: 540,  emoji: "🍜", veg: false },
+    { cat: "Sushi",    name: "Salmon Nigiri", desc: "Fresh Atlantic salmon over hand-pressed seasoned sushi rice.",                               price: 390,  emoji: "🍣", veg: false },
+    { cat: "Sushi",    name: "Tuna Roll",   desc: "Classic maki roll with bluefin tuna, avocado and sesame.",                                     price: 420,  emoji: "🌀", veg: false },
+    { cat: "Sushi",    name: "Veggie Roll", desc: "Cucumber, avocado and pickled radish wrapped in nori and rice.",                               price: 320,  emoji: "🥑", veg: true  },
+    { cat: "Mains",    name: "Teriyaki Salmon", desc: "Grilled salmon glazed with sweet teriyaki sauce, served with steamed rice.",               price: 780,  emoji: "🐟", veg: false },
+    { cat: "Mains",    name: "Katsu Curry", desc: "Crispy panko-breaded cutlet over Japanese curry with steamed rice.",                           price: 650,  emoji: "🍛", veg: false },
+    { cat: "Desserts", name: "Matcha Ice Cream", desc: "Rich and creamy ceremonial grade matcha ice cream, three scoops.",                       price: 280,  emoji: "🍦", veg: true  },
+    { cat: "Desserts", name: "Mochi",       desc: "Soft glutinous rice cakes filled with sweet red bean paste.",                                  price: 220,  emoji: "🍡", veg: true  },
   ];
 
+  // ─── BUILD FILTER TABS ────────────────────────────────────────
   const cats = ["All", ...new Set(menu.map(i => i.cat))];
   const tabsEl = document.getElementById("tabs");
+
   cats.forEach(c => {
     const t = document.createElement("div");
     t.className = "tab" + (c === "All" ? " active" : "");
@@ -405,8 +418,10 @@
     tabsEl.appendChild(t);
   });
 
+  // ─── BUILD MENU CARDS ─────────────────────────────────────────
   const scrollEl = document.getElementById("menu-scroll");
   let lastCat = "";
+
   menu.forEach(item => {
     if (item.cat !== lastCat) {
       const lbl = document.createElement("div");
@@ -415,9 +430,14 @@
       scrollEl.appendChild(lbl);
       lastCat = item.cat;
     }
+
     const card = document.createElement("div");
     card.className = "menu-card";
     card.dataset.cat = item.cat;
+
+    // ── To use a .glb model thumbnail, replace the emoji div with:
+    // <model-viewer src="YourFolder/${item.model}" auto-rotate camera-controls
+    //   style="width:58px;height:58px;border-radius:10px;"></model-viewer>
     card.innerHTML = `
       <div class="item-img">${item.emoji}</div>
       <div class="item-details">
@@ -438,6 +458,7 @@
     scrollEl.appendChild(card);
   });
 
+  // ─── FILTER LOGIC ─────────────────────────────────────────────
   function filterMenu(cat) {
     document.querySelectorAll(".tab").forEach(t =>
       t.classList.toggle("active", t.textContent === cat)
@@ -450,18 +471,25 @@
     });
   }
 
+  // ─── AR POPUP ─────────────────────────────────────────────────
   function viewAR(name, emoji, desc) {
     document.getElementById("popup-name").textContent = name;
     document.getElementById("popup-emoji").textContent = emoji;
     document.getElementById("popup-desc").textContent =
       "Point your camera at your table to see " + name + " placed in your real space.";
     document.getElementById("ar-overlay").classList.add("show");
+
+    // ── To launch real AR with model-viewer, add inside this function:
+    // const mv = document.getElementById("model-viewer-ar");
+    // mv.src = "YourFolder/" + modelFile;
+    // mv.activateAR();
   }
 
   function closeAR() {
     document.getElementById("ar-overlay").classList.remove("show");
   }
 
+  // ─── CAMERA ───────────────────────────────────────────────────
   async function startCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -471,7 +499,6 @@
       const video = document.getElementById("camera-feed");
       video.srcObject = stream;
       video.style.display = "block";
-      // FIX: hide placeholder after camera granted — menu UI becomes accessible
       document.getElementById("camera-placeholder").style.display = "none";
       document.getElementById("camera-status").textContent = "Camera Active";
     } catch (e) {
@@ -480,6 +507,8 @@
     }
   }
 
+  // ─── CART (basic) ─────────────────────────────────────────────
+  // Extend this with full cart logic as needed
   document.getElementById("cart-btn").onclick = () => {
     alert("Cart feature — wire this up to your order system!");
   };
