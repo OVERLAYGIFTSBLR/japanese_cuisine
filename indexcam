@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Sakura Dining · AR Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #000;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #camera-feed {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    display: none;
+  }
+
+  /* FIX: z-index raised to 200 — always above ui-layer (z-index:10) */
+  #camera-placeholder {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  #camera-placeholder svg { opacity: 0.4; }
+  #camera-placeholder p {
+    color: rgba(255,255,255,0.4);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0 2rem;
+  }
+
+  #enable-camera-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(10px);
+  }
+
+  #ui-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+
+  .header {
+    pointer-events: all;
+    padding: 14px 16px 10px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(0,0,0,0.35);
+    border-bottom: 0.5px solid rgba(255,255,255,0.1);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 20px;
+    color: #D4AE52;
+    letter-spacing: 0.08em;
+  }
+
+  .ar-badge {
+    background: rgba(212,174,82,0.15);
+    border: 0.5px solid rgba(212,174,82,0.4);
+    color: #D4AE52;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.05);
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    background: #D4AE52;
+    border-color: #D4AE52;
+    color: #080604;
+    font-weight: 500;
+  }
+
+  .menu-scroll {
+    pointer-events: all;
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .menu-scroll::-webkit-scrollbar { display: none; }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(212,174,82,0.8);
+    padding: 4px 0 2px;
+  }
+
+  .menu-card {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: rgba(8,6,4,0.45);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .menu-card.hidden { display: none; }
+
+  .item-img {
+    width: 58px;
+    height: 58px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+
+  .item-details { flex: 1; min-width: 0; }
+
+  .item-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 17px;
+    color: #F0E8D5;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+
+  .item-desc {
+    font-size: 10px;
+    color: rgba(240,232,213,0.5);
+    line-height: 1.4;
+    margin-bottom: 6px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .item-price {
+    font-size: 15px;
+    font-weight: 500;
+    color: #F0E8D5;
+  }
+
+  .veg-badge {
+    font-size: 9px;
+    color: #5DCAA5;
+    border: 0.5px solid rgba(93,202,165,0.4);
+    background: rgba(93,202,165,0.1);
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .ar-item-btn {
+    background: rgba(212,174,82,0.15);
+    border: 0.5px solid rgba(212,174,82,0.5);
+    color: #D4AE52;
+    font-size: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .ar-item-btn:active { transform: scale(0.95); }
+
+  .bottom-bar {
+    pointer-events: all;
+    padding: 10px 14px 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(0,0,0,0.35);
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #5DCAA5;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .cart-btn {
+    background: rgba(212,174,82,0.12);
+    border: 0.5px solid rgba(212,174,82,0.3);
+    color: #D4AE52;
+    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  #ar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #ar-overlay.show { display: flex; }
+
+  .ar-popup {
+    background: rgba(18,16,14,0.92);
+    border: 0.5px solid rgba(212,174,82,0.3);
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 85vw;
+    max-width: 340px;
+    text-align: center;
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+  }
+
+  .ar-popup-emoji { font-size: 48px; margin-bottom: 12px; }
+
+  .ar-popup h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 22px;
+    color: #F0E8D5;
+    margin-bottom: 6px;
+  }
+
+  .ar-popup p {
+    font-size: 12px;
+    color: rgba(240,232,213,0.5);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .ar-popup-close {
+    background: rgba(212,174,82,0.15);
+    border: 0.5px solid rgba(212,174,82,0.4);
+    color: #D4AE52;
+    font-size: 12px;
+    padding: 10px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<video id="camera-feed" autoplay muted playsinline></video>
+
+<!-- z-index 200 — always on top until camera is granted -->
+<div id="camera-placeholder">
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+    <circle cx="12" cy="13" r="4"/>
+  </svg>
+  <p>Enable camera to see the menu float over your real world</p>
+  <button id="enable-camera-btn" onclick="startCamera()">Enable Camera</button>
+</div>
+
+<div id="ui-layer">
+  <div class="header">
+    <div class="header-top">
+      <span class="logo">Sakura Dining</span>
+      <span class="ar-badge">Live AR</span>
+    </div>
+    <div class="filter-tabs" id="tabs"></div>
+  </div>
+
+  <div class="menu-scroll" id="menu-scroll"></div>
+
+  <div class="bottom-bar">
+    <div class="live-dot">
+      <div class="dot"></div>
+      <span id="camera-status">Camera Off</span>
+    </div>
+    <button class="cart-btn" id="cart-btn">View Cart · ₹0</button>
+  </div>
+</div>
+
+<div id="ar-overlay">
+  <div class="ar-popup">
+    <div class="ar-popup-emoji" id="popup-emoji">🍜</div>
+    <h3 id="popup-name">Item</h3>
+    <p id="popup-desc">Point your camera at the table to place this dish in AR.</p>
+    <button class="ar-popup-close" onclick="closeAR()">Close</button>
+  </div>
+</div>
+
+<script>
+  const menu = [
+    { cat: "Starters", name: "Gyoza",            desc: "Pan-fried dumplings filled with juicy meat and vegetables, crispy outside and tender inside.", price: 820,  emoji: "🥟", veg: false },
+    { cat: "Starters", name: "Edamame",          desc: "Steamed young soybeans lightly salted, a classic Japanese starter.",                           price: 250,  emoji: "🫛", veg: true  },
+    { cat: "Starters", name: "Karaage",          desc: "Light and crispy battered fried chicken, deep-fried to perfection.",                           price: 480,  emoji: "🍗", veg: false },
+    { cat: "Starters", name: "Miso Soup",        desc: "Traditional Japanese soup with tofu, wakame and spring onions.",                               price: 180,  emoji: "🍲", veg: true  },
+    { cat: "Ramen",    name: "Tonkotsu",         desc: "Rich pork bone broth with chashu, soft egg, noodles and bamboo shoots.",                       price: 620,  emoji: "🍜", veg: false },
+    { cat: "Ramen",    name: "Miso Ramen",       desc: "Rich miso-based broth with noodles, corn, butter and tender meat.",                            price: 580,  emoji: "🍜", veg: false },
+    { cat: "Ramen",    name: "Shoyu Ramen",      desc: "Light soy-based broth with chicken, mushrooms and spring onions.",                             price: 540,  emoji: "🍜", veg: false },
+    { cat: "Sushi",    name: "Salmon Nigiri",    desc: "Fresh Atlantic salmon over hand-pressed seasoned sushi rice.",                                 price: 390,  emoji: "🍣", veg: false },
+    { cat: "Sushi",    name: "Tuna Roll",        desc: "Classic maki roll with bluefin tuna, avocado and sesame.",                                     price: 420,  emoji: "🌀", veg: false },
+    { cat: "Sushi",    name: "Veggie Roll",      desc: "Cucumber, avocado and pickled radish wrapped in nori and rice.",                               price: 320,  emoji: "🥑", veg: true  },
+    { cat: "Mains",    name: "Teriyaki Salmon",  desc: "Grilled salmon glazed with sweet teriyaki sauce, served with steamed rice.",                   price: 780,  emoji: "🐟", veg: false },
+    { cat: "Mains",    name: "Katsu Curry",      desc: "Crispy panko-breaded cutlet over Japanese curry with steamed rice.",                           price: 650,  emoji: "🍛", veg: false },
+    { cat: "Desserts", name: "Matcha Ice Cream", desc: "Rich and creamy ceremonial grade matcha ice cream, three scoops.",                             price: 280,  emoji: "🍦", veg: true  },
+    { cat: "Desserts", name: "Mochi",            desc: "Soft glutinous rice cakes filled with sweet red bean paste.",                                  price: 220,  emoji: "🍡", veg: true  },
+  ];
+
+  const cats = ["All", ...new Set(menu.map(i => i.cat))];
+  const tabsEl = document.getElementById("tabs");
+  cats.forEach(c => {
+    const t = document.createElement("div");
+    t.className = "tab" + (c === "All" ? " active" : "");
+    t.textContent = c;
+    t.onclick = () => filterMenu(c);
+    tabsEl.appendChild(t);
+  });
+
+  const scrollEl = document.getElementById("menu-scroll");
+  let lastCat = "";
+  menu.forEach(item => {
+    if (item.cat !== lastCat) {
+      const lbl = document.createElement("div");
+      lbl.className = "section-label";
+      lbl.textContent = item.cat;
+      scrollEl.appendChild(lbl);
+      lastCat = item.cat;
+    }
+    const card = document.createElement("div");
+    card.className = "menu-card";
+    card.dataset.cat = item.cat;
+    card.innerHTML = `
+      <div class="item-img">${item.emoji}</div>
+      <div class="item-details">
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-footer">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="item-price">₹${item.price}</span>
+            ${item.veg ? '<span class="veg-badge">veg</span>' : ''}
+          </div>
+          <button class="ar-item-btn"
+            onclick="viewAR('${item.name}','${item.emoji}','${item.desc}')">
+            AR View
+          </button>
+        </div>
+      </div>
+    `;
+    scrollEl.appendChild(card);
+  });
+
+  function filterMenu(cat) {
+    document.querySelectorAll(".tab").forEach(t =>
+      t.classList.toggle("active", t.textContent === cat)
+    );
+    document.querySelectorAll(".menu-card").forEach(card => {
+      card.classList.toggle("hidden", cat !== "All" && card.dataset.cat !== cat);
+    });
+    document.querySelectorAll(".section-label").forEach(lbl => {
+      lbl.style.display = cat === "All" ? "block" : "none";
+    });
+  }
+
+  function viewAR(name, emoji, desc) {
+    document.getElementById("popup-name").textContent = name;
+    document.getElementById("popup-emoji").textContent = emoji;
+    document.getElementById("popup-desc").textContent =
+      "Point your camera at your table to see " + name + " placed in your real space.";
+    document.getElementById("ar-overlay").classList.add("show");
+  }
+
+  function closeAR() {
+    document.getElementById("ar-overlay").classList.remove("show");
+  }
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false
+      });
+      const video = document.getElementById("camera-feed");
+      video.srcObject = stream;
+      video.style.display = "block";
+      // FIX: hide placeholder after camera granted — menu UI becomes accessible
+      document.getElementById("camera-placeholder").style.display = "none";
+      document.getElementById("camera-status").textContent = "Camera Active";
+    } catch (e) {
+      document.querySelector("#camera-placeholder p").textContent =
+        "Camera access denied. Please allow camera permission and reload.";
+    }
+  }
+
+  document.getElementById("cart-btn").onclick = () => {
+    alert("Cart feature — wire this up to your order system!");
+  };
+</script>
+</body>
+</html>
