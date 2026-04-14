@@ -2,323 +2,478 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#1a1208;--paper:#fdf8f0;--surface:#fff9f2;
-  --accent:#c0392b;--gold:#b8860b;--muted:#7a6a55;
-  --border:rgba(139,100,50,0.15);--border-md:rgba(139,100,50,0.28);
-  --tag-veg:#2d6a4f;--tag-new:#c0392b;--tag-dotd:#b8860b;
-  --shadow:0 2px 12px rgba(26,18,8,0.08);
+--ink:#1a1208;--paper:#fdf8f0;--surface:#fff9f2;--accent:#c0392b;--gold:#b8860b;
+--muted:#7a6a55;--border:rgba(139,100,50,0.15);--border-md:rgba(139,100,50,0.28);
+--tag-veg:#2d6a4f;--tag-new:#c0392b;--tag-dotd:#b8860b;
+--safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-body{font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}
+body{background:var(--paper);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink)}
 
-/* HEADER */
-.s-header{background:var(--ink);color:#fff;text-align:center;padding:2.5rem 1rem 2rem;position:relative;overflow:hidden}
-.s-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 60%,rgba(192,57,43,0.15),transparent 60%),radial-gradient(ellipse at 80% 40%,rgba(184,134,11,0.12),transparent 60%);pointer-events:none}
-.h-jp{font-size:12px;letter-spacing:6px;color:rgba(255,255,255,0.38);margin-bottom:10px}
-.h-title{font-family:'Georgia',serif;font-size:clamp(30px,6vw,50px);font-weight:400;letter-spacing:-0.5px;margin-bottom:6px}
-.h-title em{font-style:italic;color:rgba(255,255,255,0.65)}
-.h-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:20px}
-.ar-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,0.16);border-radius:20px;padding:6px 14px;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.6)}
-.ar-dot{width:7px;height:7px;border-radius:50%;background:#e74c3c;animation:pulse 1.6s ease-in-out infinite}
+.phone-frame{
+  max-width:390px;margin:0 auto;
+  background:var(--paper);
+  border-radius:48px;
+  border:8px solid #1a1208;
+  overflow:hidden;
+  position:relative;
+  height:844px;
+  display:flex;flex-direction:column;
+  box-shadow:0 30px 80px rgba(0,0,0,0.25);
+}
+.notch{
+  width:120px;height:34px;background:#1a1208;
+  border-radius:0 0 20px 20px;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  z-index:100;
+}
+.status-bar{
+  height:44px;background:var(--ink);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 24px 6px;flex-shrink:0;
+  position:relative;z-index:50;
+}
+.status-time{color:#fff;font-size:14px;font-weight:600;letter-spacing:-0.3px}
+.status-icons{display:flex;gap:6px;align-items:center}
+.status-icons span{color:#fff;font-size:11px}
+
+.app-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:80px}
+.app-scroll::-webkit-scrollbar{display:none}
+
+.hero{
+  background:var(--ink);
+  padding:20px 20px 16px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 20% 50%,rgba(192,57,43,0.15) 0%,transparent 60%),
+              radial-gradient(circle at 80% 30%,rgba(184,134,11,0.12) 0%,transparent 60%);
+}
+.hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative}
+.hero-logo{
+  display:flex;align-items:center;gap:10px;
+}
+.logo-mark{
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(135deg,#c0392b,#8b0000);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+.logo-text h1{color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.5px;line-height:1.1}
+.logo-text p{color:rgba(255,255,255,0.45);font-size:10px;letter-spacing:2px}
+
+.hero-actions{display:flex;gap:8px}
+.icon-btn{
+  width:38px;height:38px;border-radius:12px;
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;font-size:16px;
+  -webkit-tap-highlight-color:transparent;
+  transition:background 0.15s;
+}
+.icon-btn:active{background:rgba(255,255,255,0.22)}
+
+.ar-badge-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:20px;padding:6px 12px;
+  font-size:11px;color:rgba(255,255,255,0.65);
+  position:relative;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;background:#e74c3c;flex-shrink:0;
+  animation:pulse 1.6s ease-in-out infinite;
+}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
 
-/* LANG PICKER */
-.lang-row{position:relative;z-index:10;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px}
-.lang-select{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;outline:none;font-family:inherit}
-.lang-select option{background:#1a1208;color:#fff}
-.funzone-btn{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;letter-spacing:.5px;transition:opacity .15s}
-.funzone-btn:hover{opacity:.82}
+.search-bar{
+  margin:14px 16px 0;position:relative;
+}
+.search-input{
+  width:100%;background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.15);border-radius:14px;
+  padding:11px 14px 11px 40px;
+  color:#fff;font-size:14px;
+  outline:none;
+  -webkit-appearance:none;
+}
+.search-input::placeholder{color:rgba(255,255,255,0.35);font-size:14px}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:rgba(255,255,255,0.4)}
 
-/* TABS */
-.tabs-wrap{position:sticky;top:0;z-index:100;background:var(--paper);border-bottom:1px solid var(--border);padding:0 1rem}
-.tabs-inner{max-width:760px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 0}
-.tabs-inner::-webkit-scrollbar{display:none}
-.tab-btn{flex-shrink:0;padding:7px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer;transition:all .18s;white-space:nowrap}
-.tab-btn:hover{border-color:var(--border-md);color:var(--ink)}
-.tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cat-scroll{
+  display:flex;gap:8px;padding:14px 16px;
+  overflow-x:auto;scrollbar-width:none;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-chip{
+  flex-shrink:0;padding:8px 16px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:13px;font-weight:500;
+  cursor:pointer;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  transition:all 0.15s;
+}
+.cat-chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cat-chip:active{opacity:0.7}
 
-/* MAIN */
-.main{max-width:760px;margin:0 auto;padding:1.5rem 1rem 4rem}
-.state-box{text-align:center;padding:4rem 1rem;color:var(--muted)}
-.spinner{width:30px;height:30px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
-@keyframes spin{to{transform:rotate(360deg)}}
+.section-label{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 16px 8px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* SECTION */
-.section-label{display:flex;align-items:center;gap:12px;margin:1.75rem 0 1rem;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-.section-label span{flex:1;height:1px;background:var(--border)}
+.cards-list{display:flex;flex-direction:column;gap:0;padding:0 16px;gap:10px}
 
-/* CARDS GRID */
-.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
-@media(max-width:520px){.items-grid{grid-template-columns:1fr}}
+.dish-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:14px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 0.15s;
+  display:flex;gap:12px;align-items:flex-start;
+  position:relative;
+}
+.dish-card:active{transform:scale(0.98)}
 
-.menu-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.2rem;cursor:pointer;transition:border-color .18s,transform .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;gap:12px}
-.menu-card:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:var(--shadow)}
+.dish-thumb{
+  width:72px;height:72px;flex-shrink:0;border-radius:12px;
+  background:linear-gradient(135deg,#f5ead6,#e8d5b0);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;position:relative;
+}
+.ar-tag{
+  position:absolute;bottom:3px;right:3px;
+  background:var(--ink);color:#fff;
+  font-size:7px;font-weight:600;letter-spacing:0.5px;
+  padding:2px 5px;border-radius:5px;line-height:1.5;
+}
 
-.card-top{display:flex;gap:14px;align-items:flex-start}
-.card-thumb{width:68px;height:68px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#f5ead6,#e8d5b0);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
-.ar-pill{position:absolute;bottom:3px;right:3px;background:var(--ink);color:#fff;font-size:8px;letter-spacing:.5px;padding:2px 5px;border-radius:4px;font-family:inherit;line-height:1.4}
-.card-body{flex:1;min-width:0}
-.name-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px}
-.dish-name{font-family:'Georgia',serif;font-size:17px;font-weight:400;color:var(--ink);line-height:1.2}
-.dish-jp{font-size:12px;color:var(--muted)}
-.tags-row{display:flex;gap:4px;flex-wrap:wrap;margin:5px 0 7px}
-.tag{font-size:10px;padding:2px 9px;border-radius:10px;font-weight:500;letter-spacing:.3px}
+.dish-info{flex:1;min-width:0}
+.dish-name-row{display:flex;align-items:baseline;gap:6px;margin-bottom:2px;flex-wrap:wrap}
+.dish-name{font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-0.3px}
+.dish-jp-name{font-size:11px;color:var(--muted)}
+
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin:5px 0}
+.tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;letter-spacing:0.2px}
 .tag-veg{background:#d6f0e4;color:var(--tag-veg)}
 .tag-new{background:#fde8e8;color:var(--tag-new)}
-.tag-dotd{background:#fef3d0;color:var(--tag-dotd)}
-.dish-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.tag-chef{background:#fef3d0;color:var(--tag-dotd)}
 
-/* CARD FOOTER */
-.card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);margin-top:auto}
-.dish-price{font-family:'Georgia',serif;font-size:20px;color:var(--ink)}
-.price-sym{font-family:inherit;font-size:12px;color:var(--muted);margin-right:1px}
-.ar-btn{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12px;letter-spacing:.3px;cursor:pointer;transition:opacity .15s}
-.ar-btn:hover{opacity:.78}
-.ar-btn svg{width:13px;height:13px;flex-shrink:0}
-.unavail{opacity:.4;pointer-events:none}
+.dish-desc{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:8px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(8,6,2,0.72);z-index:9000;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)}
-@media(min-width:540px){.modal-overlay{align-items:center;padding:1.5rem}}
-.modal-overlay.open{display:flex}
-.modal-card{background:var(--paper);border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;overscroll-behavior:contain;position:relative;animation:slideUp .25s ease}
-@media(min-width:540px){.modal-card{border-radius:20px;animation:fadeIn .2s ease}}
-@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-@keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
-.modal-viewer-wrap{width:100%;height:280px;background:linear-gradient(160deg,#1c140a,#2e2112);border-radius:20px 20px 0 0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.modal-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,.8);font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:background .15s}
-.modal-close:hover{background:rgba(255,255,255,.24)}
-.viewer-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.3);pointer-events:none;white-space:nowrap}
-.modal-body{padding:1.4rem 1.5rem 1.8rem}
-.modal-name{font-family:'Georgia',serif;font-size:26px;font-weight:400;margin-bottom:4px}
-.modal-jp{font-size:14px;color:var(--muted);margin-bottom:12px}
-.modal-desc{font-size:14px;color:var(--muted);line-height:1.7;padding-left:12px;border-left:2px solid var(--border);margin-bottom:18px}
-.modal-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border)}
-.modal-price{font-family:'Georgia',serif;font-size:28px}
+.dish-footer{display:flex;align-items:center;justify-content:space-between}
+.dish-price{font-size:18px;font-weight:700;color:var(--ink)}
+.price-sym{font-size:11px;font-weight:400;color:var(--muted);margin-right:1px}
 
-/* FUNZONE & EXPLORE SCREENS */
-.screen{display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto}
-.screen.open{display:block}
+.add-btn{
+  width:32px;height:32px;border-radius:10px;
+  background:var(--ink);color:#fff;border:none;
+  font-size:18px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:opacity 0.15s;
+}
+.add-btn:active{opacity:0.7}
 
-.funzone-screen{background:var(--paper)}
-.fz-hero{background:var(--ink);color:#fff;text-align:center;padding:3rem 1.5rem 2.5rem;position:relative;overflow:hidden}
-.fz-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(192,57,43,0.2),transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(184,134,11,0.15),transparent 60%);pointer-events:none}
-.fz-back{position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.16);color:rgba(255,255,255,.8);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s;z-index:5}
-.fz-back:hover{background:rgba(255,255,255,.2)}
-.fz-title{font-family:'Georgia',serif;font-size:clamp(28px,5vw,44px);font-weight:400;margin-bottom:8px}
-.fz-sub{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4)}
-.fz-grid{max-width:680px;margin:2rem auto;padding:0 1.5rem 3rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.fz-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:10px}
-.fz-card:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:var(--shadow)}
-.fz-icon{font-size:36px;margin-bottom:4px}
-.fz-card-title{font-family:'Georgia',serif;font-size:18px;font-weight:400}
-.fz-card-desc{font-size:13px;color:var(--muted);line-height:1.6}
-.fz-card-cta{margin-top:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink);padding:8px 14px;border-radius:8px;border:1px solid var(--border-md);width:fit-content;transition:background .15s}
-.fz-card:hover .fz-card-cta{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ar-view-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:transparent;border:1px solid var(--border-md);
+  color:var(--muted);border-radius:8px;
+  padding:6px 10px;font-size:11px;font-weight:500;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.ar-view-btn:active{background:var(--border)}
 
-/* EXPLORE JAPAN SCREEN */
-.ej-screen{background:#fff}
-.ej-hero{background:linear-gradient(135deg,#1a1208,#2e1f0d);color:#fff;text-align:center;padding:3rem 1.5rem 2.5rem;position:relative;overflow:hidden}
-.ej-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 40% 60%,rgba(192,57,43,0.18),transparent 55%),radial-gradient(ellipse at 70% 30%,rgba(184,134,11,0.15),transparent 50%);pointer-events:none}
-.ej-title{font-family:'Georgia',serif;font-size:clamp(26px,5vw,42px);font-weight:400;margin-bottom:8px}
-.ej-sub{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:18px}
-.ej-content{max-width:680px;margin:0 auto;padding:2rem 1.5rem 3rem}
-.ej-spots{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.ej-spot{background:#fdf8f0;border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .18s}
-.ej-spot:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:var(--shadow)}
-.ej-spot-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative}
-.ej-spot-info{padding:1rem 1.1rem}
-.ej-spot-name{font-family:'Georgia',serif;font-size:17px;font-weight:400;margin-bottom:4px}
-.ej-spot-desc{font-size:13px;color:var(--muted);line-height:1.55}
+.bottom-nav{
+  position:absolute;bottom:0;left:0;right:0;height:82px;
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;padding:0 8px;padding-bottom:var(--safe-bottom);
+  z-index:200;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:8px 4px;
+  position:relative;
+}
+.nav-icon{font-size:22px;line-height:1}
+.nav-label{font-size:10px;color:var(--muted);letter-spacing:0.3px}
+.nav-item.active .nav-label{color:var(--accent);font-weight:600}
+.nav-item.active .nav-icon{filter:none}
+.nav-dot{
+  position:absolute;top:8px;right:calc(50% - 18px);
+  width:8px;height:8px;border-radius:50%;background:var(--accent);
+  border:2px solid var(--surface);
+}
 
-/* SITE FOOTER */
-.site-footer{text-align:center;padding:1.5rem 1rem;font-size:11px;letter-spacing:1px;color:var(--muted);border-top:1px solid var(--border);line-height:1.8}
+.funzone-btn{
+  margin:16px;border-radius:14px;
+  background:linear-gradient(135deg,#1a1208,#3d2b10);
+  border:1px solid rgba(184,134,11,0.25);
+  padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.funzone-icon{font-size:28px}
+.funzone-text h3{color:#fff;font-size:15px;font-weight:600;margin-bottom:2px}
+.funzone-text p{color:rgba(255,255,255,0.5);font-size:12px}
+.funzone-arrow{margin-left:auto;color:rgba(255,255,255,0.3);font-size:18px}
+
+.dotd-card{
+  margin:4px 16px 8px;border-radius:16px;
+  background:linear-gradient(135deg,#c0392b,#8b1a0c);
+  padding:16px;display:flex;align-items:center;gap:12px;
+  overflow:hidden;position:relative;
+}
+.dotd-badge{
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.15);
+  padding:3px 8px;border-radius:6px;margin-bottom:6px;display:inline-block;
+}
+.dotd-name{color:#fff;font-size:17px;font-weight:700;margin-bottom:3px;letter-spacing:-0.3px}
+.dotd-price{color:rgba(255,255,255,0.8);font-size:14px}
+.dotd-emoji{font-size:48px;flex-shrink:0}
 </style>
 
-<!-- HEADER -->
-<header class="s-header">
-  <div class="lang-row">
-    <select class="lang-select" id="lang-select">
-      <option value="en">English</option>
-      <option value="jp">日本語</option>
-      <option value="kn">ಕನ್ನಡ</option>
-      <option value="ta">தமிழ்</option>
-      <option value="ml">മലയാളം</option>
-      <option value="te">తెలుగు</option>
-    </select>
-    <button class="funzone-btn" onclick="openScreen('funzone-screen')">🎮 Fun Zone</button>
-  </div>
-  <p class="h-jp">日本料理</p>
-  <h1 class="h-title">Sakura <em>Kitchen</em></h1>
-  <p class="h-sub" id="ui-sub">Authentic Japanese Cuisine</p>
-  <span class="ar-badge"><span class="ar-dot"></span><span id="ui-badge">Interactive 3D &amp; AR Preview</span></span>
-</header>
+<div style="padding:24px 16px;background:var(--color-background-secondary,#f8f8f8);min-height:900px;display:flex;align-items:flex-start;justify-content:center">
 
-<!-- TABS -->
-<nav class="tabs-wrap"><div class="tabs-inner" id="tabs-inner"></div></nav>
+<div class="phone-frame">
+  <div class="notch"></div>
 
-<!-- MAIN -->
-<main class="main">
-  <div class="state-box" id="loading-state"><div class="spinner"></div><p id="ui-loading">Loading menu…</p></div>
-  <div id="items-container" style="display:none"></div>
-</main>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
-  <div class="modal-card">
-    <div class="modal-viewer-wrap" id="modal-viewer-wrap">
-      <button class="modal-close" id="modal-close">✕</button>
-      <span class="viewer-hint">drag to rotate</span>
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <span>●●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
     </div>
-    <div class="modal-body">
-      <h2 class="modal-name" id="modal-name"></h2>
-      <p class="modal-jp" id="modal-jp"></p>
-      <div class="tags-row" id="modal-tags"></div>
-      <p class="modal-desc" id="modal-desc"></p>
-      <div class="modal-footer">
-        <div class="modal-price" id="modal-price"></div>
-        <div class="tags-row" id="modal-tags2"></div>
+  </div>
+
+  <div class="app-scroll" id="mainScroll">
+
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-logo">
+          <div class="logo-mark">🌸</div>
+          <div class="logo-text">
+            <h1>Sakura Kitchen</h1>
+            <p>日本料理 · JAPANESE</p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <div class="icon-btn" title="Language">🌐</div>
+          <div class="icon-btn" title="Cart">🛒</div>
+        </div>
+      </div>
+      <div class="ar-badge-pill">
+        <span class="live-dot"></span>
+        Interactive 3D &amp; AR Preview
+      </div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" placeholder="Search dishes, ingredients…" readonly />
       </div>
     </div>
+
+    <div class="cat-scroll" id="catScroll">
+      <div class="cat-chip active" data-cat="all">All</div>
+      <div class="cat-chip" data-cat="starter">Starters</div>
+      <div class="cat-chip" data-cat="ramen">Ramen</div>
+      <div class="cat-chip" data-cat="sushi">Sushi</div>
+      <div class="cat-chip" data-cat="mains">Mains</div>
+      <div class="cat-chip" data-cat="desserts">Desserts</div>
+    </div>
+
+    <div class="dotd-card">
+      <div>
+        <div class="dotd-badge">★ Chef's Pick Today</div>
+        <div class="dotd-name">Tonkotsu Ramen</div>
+        <div class="dotd-price">₹649</div>
+      </div>
+      <div class="dotd-emoji">🍜</div>
+    </div>
+
+    <div class="section-label">Starters</div>
+    <div class="cards-list">
+
+      <div class="dish-card">
+        <div class="dish-thumb">
+          <span>🥟</span>
+          <span class="ar-tag">AR</span>
+        </div>
+        <div class="dish-info">
+          <div class="dish-name-row">
+            <span class="dish-name">Gyoza</span>
+            <span class="dish-jp-name">餃子</span>
+          </div>
+          <div class="tags">
+            <span class="tag tag-veg">🌿 veg</span>
+            <span class="tag tag-new">new</span>
+          </div>
+          <p class="dish-desc">Pan-fried Japanese dumplings filled with cabbage, ginger and tofu, served with ponzu dipping sauce.</p>
+          <div class="dish-footer">
+            <div class="dish-price"><span class="price-sym">₹</span>299</div>
+            <div style="display:flex;gap:6px">
+              <button class="ar-view-btn">📦 3D View</button>
+              <button class="add-btn">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dish-card">
+        <div class="dish-thumb"><span>🐙</span><span class="ar-tag">AR</span></div>
+        <div class="dish-info">
+          <div class="dish-name-row">
+            <span class="dish-name">Takoyaki</span>
+            <span class="dish-jp-name">たこ焼き</span>
+          </div>
+          <div class="tags">
+            <span class="tag tag-chef">★ chef's pick</span>
+          </div>
+          <p class="dish-desc">Crispy Osaka-style octopus balls topped with bonito flakes, mayo and takoyaki sauce.</p>
+          <div class="dish-footer">
+            <div class="dish-price"><span class="price-sym">₹</span>349</div>
+            <div style="display:flex;gap:6px">
+              <button class="ar-view-btn">📦 3D View</button>
+              <button class="add-btn">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dish-card">
+        <div class="dish-thumb"><span>🍗</span></div>
+        <div class="dish-info">
+          <div class="dish-name-row">
+            <span class="dish-name">Karaage</span>
+            <span class="dish-jp-name">唐揚げ</span>
+          </div>
+          <div class="tags"></div>
+          <p class="dish-desc">Japanese fried chicken marinated in soy, sake and ginger, extra crispy outside, juicy inside.</p>
+          <div class="dish-footer">
+            <div class="dish-price"><span class="price-sym">₹</span>379</div>
+            <button class="add-btn">+</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-label">Ramen</div>
+    <div class="cards-list">
+      <div class="dish-card">
+        <div class="dish-thumb"><span>🍜</span><span class="ar-tag">AR</span></div>
+        <div class="dish-info">
+          <div class="dish-name-row">
+            <span class="dish-name">Ramen</span>
+            <span class="dish-jp-name">ラーメン</span>
+          </div>
+          <div class="tags">
+            <span class="tag tag-chef">★ chef's pick</span>
+          </div>
+          <p class="dish-desc">Rich tonkotsu broth simmered 12 hours, with chashu pork, soft egg, nori and spring onion.</p>
+          <div class="dish-footer">
+            <div class="dish-price"><span class="price-sym">₹</span>649</div>
+            <div style="display:flex;gap:6px">
+              <button class="ar-view-btn">📦 3D View</button>
+              <button class="add-btn">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Desserts</div>
+    <div class="cards-list" style="margin-bottom:12px">
+      <div class="dish-card">
+        <div class="dish-thumb"><span>🍦</span><span class="ar-tag">AR</span></div>
+        <div class="dish-info">
+          <div class="dish-name-row">
+            <span class="dish-name">Matcha Ice Cream</span>
+          </div>
+          <div class="tags">
+            <span class="tag tag-veg">🌿 veg</span>
+          </div>
+          <p class="dish-desc">Ceremonial-grade matcha soft serve with red bean paste and mochi topping.</p>
+          <div class="dish-footer">
+            <div class="dish-price"><span class="price-sym">₹</span>229</div>
+            <div style="display:flex;gap:6px">
+              <button class="ar-view-btn">📦 3D View</button>
+              <button class="add-btn">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="funzone-btn">
+      <div class="funzone-icon">🎮</div>
+      <div class="funzone-text">
+        <h3>Fun Zone</h3>
+        <p>Explore Japan &amp; mini games</p>
+      </div>
+      <div class="funzone-arrow">›</div>
+    </div>
+
+    <div style="text-align:center;padding:16px 16px 8px;font-size:11px;color:var(--muted);line-height:1.8;letter-spacing:0.5px">
+      Tap any dish to view in 3D · AR on compatible devices<br>
+      🌿 Vegetarian friendly · Prices in ₹
+    </div>
+
   </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active">
+      <div class="nav-icon">🍽️</div>
+      <div class="nav-label" style="color:var(--accent)">Menu</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">🔍</div>
+      <div class="nav-label">Search</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">🛒</div>
+      <div class="nav-label">Cart</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">🎮</div>
+      <div class="nav-label">Fun Zone</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">Profile</div>
+    </div>
+  </nav>
+
+</div>
 </div>
 
-<!-- FUN ZONE SCREEN -->
-<div class="screen funzone-screen" id="funzone-screen">
-  <div class="fz-hero">
-    <button class="fz-back" onclick="closeScreen('funzone-screen')">← Back</button>
-    <p class="fz-sub" style="margin-bottom:12px">Sakura Kitchen</p>
-    <h1 class="fz-title">🎮 Fun Zone</h1>
-    <p class="fz-sub">Entertainment for the whole table</p>
-  </div>
-  <div class="fz-grid">
-    <div class="fz-card" onclick="openScreen('explorejapan-screen')">
-      <div class="fz-icon">🇯🇵</div>
-      <div class="fz-card-title">Explore Japan</div>
-      <p class="fz-card-desc">Discover iconic landmarks, culture, and hidden gems across the Land of the Rising Sun.</p>
-      <div class="fz-card-cta">Start exploring →</div>
-    </div>
-    <div class="fz-card">
-      <div class="fz-icon">🎴</div>
-      <div class="fz-card-title">Japanese Trivia</div>
-      <p class="fz-card-desc">Test your knowledge of Japanese food, culture, history, and language. How much do you know?</p>
-      <div class="fz-card-cta">Play trivia →</div>
-    </div>
-    <div class="fz-card">
-      <div class="fz-icon">📸</div>
-      <div class="fz-card-title">Chef's Stories</div>
-      <p class="fz-card-desc">Behind-the-scenes stories about our dishes, ingredients sourced from Japan, and our head chef.</p>
-      <div class="fz-card-cta">Read stories →</div>
-    </div>
-    <div class="fz-card">
-      <div class="fz-icon">🎋</div>
-      <div class="fz-card-title">Origami Guide</div>
-      <p class="fz-card-desc">Learn to fold simple origami shapes while you wait. Step-by-step interactive instructions.</p>
-      <div class="fz-card-cta">Try origami →</div>
-    </div>
-  </div>
-</div>
-
-<!-- EXPLORE JAPAN SCREEN -->
-<div class="screen ej-screen" id="explorejapan-screen">
-  <div class="ej-hero">
-    <button class="fz-back" onclick="closeScreen('explorejapan-screen')">← Fun Zone</button>
-    <h1 class="ej-title">🇯🇵 Explore Japan</h1>
-    <p class="ej-sub">Iconic destinations & hidden gems</p>
-  </div>
-  <div class="ej-content">
-    <div class="ej-spots">
-      <div class="ej-spot">
-        <div class="ej-spot-img" style="background:linear-gradient(135deg,#ffe4e1,#ffd0cc)">🏔️</div>
-        <div class="ej-spot-info">
-          <div class="ej-spot-name">Mount Fuji</div>
-          <p class="ej-spot-desc">Japan's iconic volcano and highest peak. A UNESCO World Heritage site and symbol of the nation.</p>
-        </div>
-      </div>
-      <div class="ej-spot">
-        <div class="ej-spot-img" style="background:linear-gradient(135deg,#e8f4fd,#cce8f9)">⛩️</div>
-        <div class="ej-spot-info">
-          <div class="ej-spot-name">Fushimi Inari</div>
-          <p class="ej-spot-desc">Thousands of vermilion torii gates winding through the forested hills of Kyoto.</p>
-        </div>
-      </div>
-      <div class="ej-spot">
-        <div class="ej-spot-img" style="background:linear-gradient(135deg,#f0fce8,#d5f4b8)">🌸</div>
-        <div class="ej-spot-info">
-          <div class="ej-spot-name">Shinjuku Gyoen</div>
-          <p class="ej-spot-desc">One of Tokyo's largest parks, famous for its spectacular cherry blossoms in spring.</p>
-        </div>
-      </div>
-      <div class="ej-spot">
-        <div class="ej-spot-img" style="background:linear-gradient(135deg,#fefbea,#fdf0b0)">🦌</div>
-        <div class="ej-spot-info">
-          <div class="ej-spot-name">Nara Park</div>
-          <p class="ej-spot-desc">Roam freely with over 1,000 wild deer considered sacred messengers of the gods.</p>
-        </div>
-      </div>
-      <div class="ej-spot">
-        <div class="ej-spot-img" style="background:linear-gradient(135deg,#f5e6ff,#e0c8f8)">🐙</div>
-        <div class="ej-spot-info">
-          <div class="ej-spot-name">Dotonbori, Osaka</div>
-          <p class="ej-spot-desc">The neon-lit food paradise of Japan — street food, giant signs, and endless energy.</p>
-        </div>
-      </div>
-      <div class="ej-spot">
-        <div class="ej-spot-img" style="background:linear-gradient(135deg,#e0f7f4,#b2ece6)">🏯</div>
-        <div class="ej-spot-info">
-          <div class="ej-spot-name">Himeji Castle</div>
-          <p class="ej-spot-desc">The "White Heron Castle" — Japan's finest surviving feudal castle and a UNESCO site.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-  Tap any dish to view in 3D &nbsp;·&nbsp; Prices in ₹ &nbsp;·&nbsp; 🌿 Vegetarian friendly<br>
-  <span style="opacity:.5">AR requires a compatible mobile device</span>
-</footer>
-
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script>
-const SHEET_ID='1QAReLCzWLQEfNyY9V6Cg5VbGPqmbXh4XCZ_RCQSRlz0';
-const SHEET_GID='0';
-const CSV_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
-const EMOJI_MAP={'gyoza':'🥟','edamame':'🫘','karaage':'🍗','miso soup':'🍵','takoyaki':'🐙','agedashi tofu':'🫕','ramen':'🍜','salmon sashimi':'🐟','tempura':'🍤','matcha ice cream':'🍦'};
-const I18N={en:{sub:'Authentic Japanese Cuisine',badge:'Interactive 3D & AR Preview',veg:'veg',loading:'Loading menu…'},jp:{sub:'本物の日本料理',badge:'インタラクティブ3DとARプレビュー',veg:'ベジ',loading:'読み込み中…'},kn:{sub:'ಅಧಿಕೃತ ಜಪಾನೀಸ್ ಆಹಾರ',badge:'ಸಂವಾದಾತ್ಮಕ 3D ಮತ್ತು AR ಮುನ್ನೋಟ',veg:'ಸಸ್ಯಹಾರಿ',loading:'ಲೋಡ್ ಆಗುತ್ತಿದೆ…'},ta:{sub:'உண்மையான ஜப்பானிய உணவு',badge:'ஊடாடும் 3D மற்றும் AR மாதிரிக்காட்சி',veg:'சைவம்',loading:'ஏற்றப்படுகிறது…'},ml:{sub:'ആധികാരിക ജാപ്പനീസ് വിഭവങ്ങൾ',badge:'ഇന്ററാക്ടീവ് 3D & AR പ്രിവ്യൂ',veg:'വെജ്',loading:'ലോഡ് ചെയ്യുന്നു…'},te:{sub:'ప్రామాణిక జపనీస్ వంటకాలు',badge:'ఇంటరాక్టివ్ 3D & AR ప్రివ్యూ',veg:'శాఖాహారం',loading:'లోడ్ అవుతోంది…'}};
-const CAT_LABELS={all:{en:'All',jp:'すべて',kn:'ಎಲ್ಲವೂ',ta:'அனைத்தும்',ml:'എല്ലാം',te:'అన్నీ'},starter:{en:'Starters',jp:'スターター',kn:'ಆರಂಭಿಕಗಳು',ta:'துவக்கிகள்',ml:'സ്റ്റാർട്ടറുകൾ',te:'ప్రారంభకాలు'},ramen:{en:'Ramen',jp:'ラーメン',kn:'ರಾಮೆನ್',ta:'ராமன்',ml:'രാമെൻ',te:'రామెన్'},sushi:{en:'Sushi',jp:'寿司',kn:'ಸುಶಿ',ta:'சுஷி',ml:'സുഷി',te:'సుషీ'},rice:{en:'Mains',jp:'メイン',kn:'ಮುಖ್ಯ ಆಹಾರ',ta:'முக்கிய உணவு',ml:'പ്രധാന ഭക്ഷണം',te:'ప్రధాన వంటకాలు'},drinks:{en:'Desserts',jp:'デザート',kn:'ಸಿಹಿತಿಂಡಿಗಳು',ta:'இனிப்புகள்',ml:'ഡെസേർട്ടുകൾ',te:'తీపి వంటకాలు'}};
-
-let allDishes=[],rawRows=[],activeCategory='all',currentLang='en';
-
-function parseCSV(text){const lines=text.trim().split('\n');if(lines.length<2)return[];const headers=splitLine(lines[0]).map(h=>h.trim().toLowerCase());return lines.slice(1).map(line=>{const vals=splitLine(line);const obj={};headers.forEach((h,i)=>{obj[h]=(vals[i]||'').trim();});return obj;});}
-function splitLine(line){const result=[];let cur='';let inQ=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'&&!inQ){inQ=true;continue;}if(ch==='"'&&inQ){if(line[i+1]==='"'){cur+='"';i++;}else{inQ=false;}continue;}if(ch===','&&!inQ){result.push(cur);cur='';continue;}cur+=ch;}result.push(cur);return result;}
-
-function rowToDish(row){const truthy=v=>['true','yes','1'].includes((v||'').toLowerCase());const sfx=currentLang!=='en'?`_${currentLang}`:'';const desc=row[`description${sfx}`]||row['description']||'';const name=row[`name${sfx}`]||row['name']||'';const rawGlb=(row['glb_url']||'').trim();const glbPath=rawGlb?decodeURIComponent(rawGlb):'';return{id:row['id']||'',name,category:(row['category']||'other').toLowerCase(),jp:row['jp_name']||'',desc,price:parseInt(row['price']||'0',10),veg:truthy(row['veg']),dotd:truthy(row['dish of the day']||row['dotd']),isNew:truthy(row['new']),available:truthy(row['available']),glbPath,scale:parseFloat(row['scale']||'1')||1,emoji:EMOJI_MAP[(row['name']||'').toLowerCase()]||'🍽️'};}
-
-function tagHTML(d){const t=I18N[currentLang]||I18N.en;return[d.veg?`<span class="tag tag-veg">🌿 ${t.veg}</span>`:'',d.isNew?'<span class="tag tag-new">new</span>':'',d.dotd?`<span class="tag tag-dotd">★ chef's pick</span>`:''].join('');}
-function catLabel(cat){const map=CAT_LABELS[cat];return map?(map[currentLang]||map.en):(cat.charAt(0).toUpperCase()+cat.slice(1));}
-
-function renderTabs(){const cats=['all',...new Set(allDishes.map(d=>d.category))];const wrap=document.getElementById('tabs-inner');wrap.innerHTML=cats.map(c=>`<button class="tab-btn${c===activeCategory?' active':''}" data-cat="${c}">${catLabel(c)}</button>`).join('');wrap.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{activeCategory=btn.dataset.cat;renderTabs();renderItems();}));}
-
-const SVG_CUBE=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`;
-
-function cardHTML(d){return`<div class="menu-card${d.available?'':' unavail'}" data-id="${d.id}" role="button" tabindex="0"><div class="card-top"><div class="card-thumb"><span>${d.emoji}</span>${d.glbPath?'<span class="ar-pill">AR</span>':''}</div><div class="card-body"><div class="name-row"><span class="dish-name">${d.name}</span>${d.jp?`<span class="dish-jp">${d.jp}</span>`:''}</div><div class="tags-row">${tagHTML(d)}</div><p class="dish-desc">${d.desc}</p></div></div><div class="card-footer"><div class="dish-price"><span class="price-sym">₹</span>${d.price.toLocaleString('en-IN')}</div>${d.glbPath?`<button class="ar-btn" data-id="${d.id}">${SVG_CUBE} View in AR</button>`:''}</div></div>`;}
-
-function renderItems(){const filtered=activeCategory==='all'?allDishes:allDishes.filter(d=>d.category===activeCategory);const container=document.getElementById('items-container');if(activeCategory==='all'){const grouped={};filtered.forEach(d=>{(grouped[d.category]=grouped[d.category]||[]).push(d);});container.innerHTML=Object.entries(grouped).map(([cat,items])=>`<div class="section-label"><span></span>${catLabel(cat)}<span></span></div><div class="items-grid">${items.map(cardHTML).join('')}</div>`).join('');}else{container.innerHTML=`<div class="items-grid">${filtered.map(cardHTML).join('')}</div>`;}container.querySelectorAll('.menu-card').forEach(card=>card.addEventListener('click',()=>openModal(card.dataset.id)));container.querySelectorAll('.ar-btn').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();openModal(btn.dataset.id);}));}
-
-function openModal(id){const d=allDishes.find(x=>x.id===id);if(!d)return;document.getElementById('modal-name').textContent=d.name;document.getElementById('modal-jp').textContent=d.jp;document.getElementById('modal-desc').textContent=d.desc;document.getElementById('modal-price').innerHTML=`<span style="font-size:14px;color:var(--muted)">₹</span>${d.price.toLocaleString('en-IN')}`;document.getElementById('modal-tags').innerHTML=tagHTML(d);document.getElementById('modal-tags2').innerHTML=tagHTML(d);const vw=document.getElementById('modal-viewer-wrap');const prev=vw.querySelector('model-viewer,.no-model');if(prev)prev.remove();if(d.glbPath){const mv=document.createElement('model-viewer');mv.setAttribute('src',d.glbPath);const s=(d.scale||1).toFixed(4);mv.setAttribute('scale',`${s} ${s} ${s}`);mv.setAttribute('camera-orbit','0deg 75deg 1.2m');mv.setAttribute('ar','');mv.setAttribute('ar-modes','webxr scene-viewer quick-look');mv.setAttribute('ar-placement','floor');mv.setAttribute('ar-scale','fixed');mv.setAttribute('camera-controls','');mv.setAttribute('auto-rotate','');mv.setAttribute('shadow-intensity','1');mv.setAttribute('environment-image','neutral');mv.setAttribute('exposure','1');mv.setAttribute('loading','eager');mv.setAttribute('interaction-prompt','none');mv.style.cssText='display:block;width:100%;height:280px;background:transparent;--progress-bar-color:#b8860b';vw.insertBefore(mv,vw.querySelector('.viewer-hint'));}else{const ph=document.createElement('div');ph.className='no-model';ph.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:10px;';ph.innerHTML=`<span style="font-size:72px">${d.emoji}</span><span style="font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.3)">3D model not available</span>`;vw.insertBefore(ph,vw.querySelector('.viewer-hint'));}document.getElementById('modal-overlay').classList.add('open');document.body.style.overflow='hidden';}
-
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow='';const mv=document.querySelector('#modal-viewer-wrap model-viewer');if(mv)mv.remove();}
-
-document.getElementById('modal-close').addEventListener('click',closeModal);
-document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('modal-overlay'))closeModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
-
-document.getElementById('lang-select').addEventListener('change',e=>{currentLang=e.target.value;const t=I18N[currentLang]||I18N.en;document.getElementById('ui-sub').textContent=t.sub;document.getElementById('ui-badge').textContent=t.badge;document.getElementById('ui-loading').textContent=t.loading;allDishes=rawRows.map(rowToDish).filter(d=>d.name);renderTabs();renderItems();});
-
-function openScreen(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
-function closeScreen(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
-
-async function init(){const loadingEl=document.getElementById('loading-state');const container=document.getElementById('items-container');try{const res=await fetch(CSV_URL);if(!res.ok)throw new Error(`HTTP ${res.status}`);const text=await res.text();rawRows=parseCSV(text);allDishes=rawRows.map(rowToDish).filter(d=>d.name);if(!allDishes.length)throw new Error('No dishes found.');loadingEl.style.display='none';container.style.display='block';renderTabs();renderItems();}catch(err){console.error('Menu load error:',err);loadingEl.innerHTML=`<p style="color:#c0392b;font-weight:500;margin-bottom:8px">Could not load menu data</p><p style="font-size:13px;line-height:1.7">Make sure your sheet is published:<br><strong>File → Share → Publish to web → CSV</strong></p>`;}}
-init();
+document.querySelectorAll('.cat-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+    const lbl=item.querySelector('.nav-label');
+    document.querySelectorAll('.nav-item .nav-label').forEach(l=>l.style.color='');
+    lbl.style.color='var(--accent)';
+  });
+});
+document.querySelectorAll('.add-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    btn.textContent='✓';
+    btn.style.background='#2d6a4f';
+    setTimeout(()=>{btn.textContent='+';btn.style.background='var(--ink)'},1200);
+  });
+});
 </script>
