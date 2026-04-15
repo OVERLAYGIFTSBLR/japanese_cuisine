@@ -754,10 +754,13 @@ const s = (d.scale || 1).toFixed(4);
 mv.setAttribute('scale', `${s} ${s} ${s}`);
 
 
+// 🔒 LOCK CAMERA DISTANCE
+mv.setAttribute('camera-orbit', '0deg 75deg 1.2m');
+mv.setAttribute('min-camera-orbit', '0deg 75deg 1.2m');
+mv.setAttribute('max-camera-orbit', '0deg 75deg 1.2m');
+
 // 🔒 FIX AR SIZE
-mv.setAttribute('loading', 'eager');
-mv.setAttribute('reveal', 'auto');
-mv.setAttribute('poster', `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='300' height='300' fill='%231c140a'/><text x='150' y='165' font-size='80' text-anchor='middle'>${d.emoji}</text></svg>`);
+mv.setAttribute('ar-scale', 'fixed');
 
 // CLEAN UI
 mv.setAttribute('interaction-prompt', 'none');
@@ -847,16 +850,7 @@ async function init() {
 }
 
 init();
-allDishes.forEach(d => {
-  if (d.glbPath) {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.href = d.glbPath;
-    link.as = 'fetch';
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
-  }
-});
+
 </script>
 <script src="script.js"></script>
 <!-- FUN ZONE SCREEN -->
