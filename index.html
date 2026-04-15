@@ -463,7 +463,6 @@ body {
          border-radius:8px; 
          cursor:pointer;">
   🎮 FUN ZONE
-   </button>
 
 </div>
   </div>
@@ -747,40 +746,33 @@ function openModal(id) {
   if (d.glbPath) {
     const mv = document.createElement('model-viewer');
 
-    // Source
-    mv.setAttribute('src', d.glbPath);
+mv.setAttribute('src', d.glbPath);
 
-    // Scale from sheet
-    const s = (d.scale || 1).toFixed(4);
-    mv.setAttribute('scale', `${s} ${s} ${s}`);
 
-    // Lock camera — prevents pinch zoom from changing perceived size
-    const orbit = `0deg 75deg ${(2.5 / (d.scale || 1)).toFixed(2)}m`;
-    mv.setAttribute('camera-orbit',     orbit);
-    mv.setAttribute('min-camera-orbit', orbit);
-    mv.setAttribute('max-camera-orbit', orbit);
+// ✅ SCALE FROM SHEET
+const s = (d.scale || 1).toFixed(4);
+mv.setAttribute('scale', `${s} ${s} ${s}`);
 
-    // AR
+
+// 🔒 FIX AR SIZE
+mv.setAttribute('loading', 'eager');
+mv.setAttribute('reveal', 'auto');
+mv.setAttribute('poster', `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='300' height='300' fill='%231c140a'/><text x='150' y='165' font-size='80' text-anchor='middle'>${d.emoji}</text></svg>`);
+
+// CLEAN UI
+mv.setAttribute('interaction-prompt', 'none');
+
+    // Uncomment next line if you have .usdz files alongside .glb:
+    // mv.setAttribute('ios-src', d.glbPath.replace(/\.glb$/i, '.usdz'));
     mv.setAttribute('ar',           '');
     mv.setAttribute('ar-modes',     'webxr scene-viewer quick-look');
     mv.setAttribute('ar-placement', 'floor');
-    mv.setAttribute('ar-scale',     'fixed');
-
-    // Controls
-    mv.setAttribute('camera-controls',  '');
-    mv.setAttribute('auto-rotate',      '');
-    mv.setAttribute('interaction-prompt', 'none');
-
-    // Lighting
-    mv.setAttribute('shadow-intensity',    '1');
-    mv.setAttribute('environment-image',   'neutral');
-    mv.setAttribute('exposure',            '1');
-
-    // Loading — show emoji poster instantly, swap to 3D when ready
-    mv.setAttribute('loading', 'eager');
-    mv.setAttribute('reveal',  'auto');
-    mv.setAttribute('poster',  `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='300' height='300' fill='%231c140a'/><text x='150' y='165' font-size='80' text-anchor='middle'>${d.emoji}</text></svg>`);
-
+    mv.setAttribute('camera-controls', '');
+    mv.setAttribute('auto-rotate',  '');
+    mv.setAttribute('shadow-intensity', '1');
+    mv.setAttribute('environment-image', 'neutral');
+    mv.setAttribute('exposure',     '1');
+    mv.setAttribute('loading',      'eager');
     mv.style.cssText = 'display:block;width:100%;height:300px;background:transparent;';
     vw.insertBefore(mv, vw.querySelector('.viewer-hint'));
   } else {
@@ -795,6 +787,34 @@ function openModal(id) {
   document.getElementById('modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  // Remove model-viewer completely to stop streaming / free memory
+  const mv = document.querySelector('#modal-viewer-wrap model-viewer');
+  if (mv) mv.remove();
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ─────────────────────────────────────────────────────────────
+//  LANGUAGE SWITCH
+// ─────────────────────────────────────────────────────────────
+document.getElementById('lang-select').addEventListener('change', e => {
+  currentLang = e.target.value;
+  const t = I18N[currentLang] || I18N.en;
+  document.getElementById('ui-sub-tag').textContent  = t.sub;
+  document.getElementById('ui-ar-badge').textContent = t.badge;
+  document.getElementById('ui-loading').textContent  = t.loading;
+  allDishes = rawRows.map(rowToDish).filter(d => d.name);
+  renderTabs();
+  renderItems();
+});
 
 // ─────────────────────────────────────────────────────────────
 //  INIT
@@ -825,19 +845,18 @@ async function init() {
       </p>`;
   }
 }
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-  const mv = document.querySelector('#modal-viewer-wrap model-viewer');
-  if (mv) mv.remove();
-}
 
-document.getElementById('modal-close').addEventListener('click', closeModal);
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
+init();
+allDishes.forEach(d => {
+  if (d.glbPath) {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = d.glbPath;
+    link.as = 'fetch';
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  }
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-init(); //
 </script>
 <script src="script.js"></script>
 <!-- FUN ZONE SCREEN -->
