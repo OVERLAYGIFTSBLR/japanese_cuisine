@@ -749,21 +749,9 @@ function openModal(id) {
 mv.setAttribute('src', d.glbPath);
 
 
+// ✅ SCALE FROM SHEET
 const s = (d.scale || 1).toFixed(4);
 mv.setAttribute('scale', `${s} ${s} ${s}`);
-
-// Lock camera so pinch zoom cannot change perceived size
-const orbit = `0deg 75deg ${(2.5 / (d.scale || 1)).toFixed(2)}m`;
-mv.setAttribute('camera-orbit', orbit);
-mv.setAttribute('min-camera-orbit', orbit);
-mv.setAttribute('max-camera-orbit', orbit);
-
-// Fix AR placement size
-mv.setAttribute('ar-scale', 'fixed');
-
-// Clean UI
-mv.setAttribute('interaction-prompt', 'none');
-mv.setAttribute('disable-zoom', '');
 
 
 // 🔒 FIX AR SIZE
